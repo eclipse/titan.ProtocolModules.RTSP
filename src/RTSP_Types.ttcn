@@ -1,0 +1,341 @@
+/******************************************************************************
+* Copyright (c) 2010, 2014  Ericsson AB
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the Eclipse Public License v1.0
+* which accompanies this distribution, and is available at
+* http://www.eclipse.org/legal/epl-v10.html
+*
+* Contributors:
+*   Timea Moder - initial implementation and initial documentation
+*   Attila Balasko
+*   Kulcsár Endre
+******************************************************************************/
+//
+//  File:               RTSP_Types.ttcn
+//  Description:        RTSP Message types
+//  Rev:                R2A
+//  Prodnr:             CNL 113 588
+//  References:     [1]  RFC 2326, Real Time Streaming Protocol -- 1.0
+//                  [2]  RFC 2068, Hypertext Transfer Protocol -- HTTP 1.1
+//                  [3]  Interface Description RTSPx
+
+module RTSP_Types {
+
+modulepar {
+  boolean tsp_RTSP_debugging := false;
+  strict_crlf_mode tsp_crlf_mode:=WARNING_ONCE;
+}
+
+external function enc_PDU_RTSP(
+  in PDU_RTSP msg,
+  in boolean automaticContentLengthCalc:=true) 
+return octetstring;
+
+external function dec_PDU_RTSP( 
+  in octetstring stream, 
+  inout PDU_RTSP msg, 
+  in boolean debugging := tsp_RTSP_debugging) 
+return integer 
+
+
+external function f_RTSP_getMsgLen(in octetstring stream) return integer;
+
+//======  Basic types =====
+type enumerated strict_crlf_mode {ERROR, WARNING, WARNING_ONCE, ACCEPT};
+
+type record HeaderLine {
+  charstring header_name,
+  charstring header_value
+};
+
+type record of HeaderLine HeaderLines;
+//type record of integer IntegerList;
+
+//Top-Down method:
+//===== Top Level PDU =================
+
+type union PDU_RTSP {
+  RTSPRequest request,
+  RTSPResponse response,
+  RTSP_erronous_msg erronous_msg
+}
+
+//============= REQUEST ====================
+type record RTSPRequest {
+  RequestLine requestLine,
+  HeaderStruct header,
+  octetstring body 
+};
+
+type record RequestLine {
+  Method method,
+  RequestURI uri,
+  RTSPVersion version
+}
+
+type enumerated Method {
+  DESCRIBE, ANNOUNCE, GET_PARAMETER, OPTIONS, PAUSE, PLAY, RECORD, REDIRECT, SETUP, SET_PARAMETER, TEARDOWN
+}
+
+type charstring RequestURI;
+
+type record RTSPVersion {
+  integer major, //1 <= to avoid conversion
+  integer minor  //0
+}
+
+//New solution: structure
+type set HeaderStruct {                //Ref:   type:   support: method
+  charstring    accept          optional, //12.1
+  charstring    acceptEncoding  optional, //12.2
+  charstring    acceptLanguage  optional, //12.3
+  charstring    allow           optional, //12.4
+  charstring    authorization   optional, //12.5
+  charstring    bandwidth       optional, //12.6
+  charstring    blocksize       optional, //12.7
+  charstring    cacheControl    optional, //12.8   g       opt     SETUP
+  charstring    conference      optional, //12.9.  R       opt     SETUP
+  charstring    connection      optional, //12.10  g
+  charstring    contentBase     optional, //12.11
+  charstring    contentEncoding optional, //12.12
+  charstring    contentLanguage optional, //12.13
+  charstring    contentLength   optional, //12.14
+  charstring    contentLocation optional, //12.15
+  charstring    contentType     optional, //12.16
+  charstring    cSeq            optional, //12.17
+  charstring    date            optional, //12.18
+  charstring    expires         optional, //12.19
+  charstring    fromField       optional, //12.20
+  charstring    host            optional, //12.21
+  charstring    ifMatch         optional, //12.22
+  charstring    ifModifiedSince optional, //12.23
+  charstring    lastModified    optional, //12.24
+  charstring    location        optional, //12.25
+  charstring    proxyAuth       optional, //12.26
+  charstring    proxyRequire    optional, //12/27
+  charstring    publicField     optional, //12.28
+  charstring    range           optional, //12.29
+  charstring    rdtFeatureLevel optional, //additional fields found in James's log
+  charstring    realChallenge1  optional, //additional fields found in James's log
+  charstring    reconnect       optional, //additional fields found in James's log
+  charstring    referer         optional, //12.30
+  charstring    retryAfter      optional, //12.31
+  charstring    require         optional, //12.32
+  charstring    rtcpInterval    optional, //additional fields found in James's log
+  charstring    rtpInfo         optional, //12.33
+  charstring    scale           optional, //12.34
+  charstring    speed           optional, //12.35
+  charstring    server          optional, //12.36
+  charstring    session         optional, //12.37
+  charstring    statsMask       optional, //additional fields found in James's log
+  charstring    timeStamp       optional, //12.38
+  charstring    transport       optional, //12.39
+  charstring    unsupported     optional, //12.40
+  charstring    userAgent       optional, //12.41
+  charstring    vary            optional, //12.42
+  charstring    via             optional, //12.43
+  charstring    vsrc            optional, //additional fields found in James's log
+  charstring    wwwAuth         optional, //12.44 
+  charstring    xRealUsestrackid optional,//additional fields found in James's log
+  charstring    xVigBno         optional, //additional fields found in James's log
+  charstring    xVigMsisdn      optional, //additional
+  charstring    xRetransmit     optional, //additional fields found in log of Anders
+  charstring    xDynamicRate    optional, //additional fields found in log of Anders
+  charstring    xTransportOptions optional, //additional fields found in log of Anders
+  charstring    xPrebuffer      optional, //additional fields found in log of Anders  
+  charstring    xAction         optional, // Interface Description RTSPx
+  charstring    xEncodingFiles  optional, // Interface Description RTSPx     
+  charstring    xUdpPipe        optional, // Interface Description RTSPx   
+  charstring    xMbmsSync       optional, // Interface Description RTSPx  
+  charstring    xBandwidth      optional, // Interface Description RTSPx  
+  charstring    xContent        optional, // Interface Description RTSPx    
+  charstring    xFec            optional, // Interface Description RTSPx     
+  charstring    xUserPlaneDest  optional, // Interface Description RTSPx 
+  charstring    xFluteBitrate   optional, // Interface Description RTSPx 
+  charstring    xTsi            optional, // Interface Description RTSPx   
+  charstring    xContentFdtSendInterval optional, // Interface Description RTSPx  
+  charstring    xReporting      optional, // Interface Description RTSPx         
+//extensionHeaders:
+  HeaderLines extensionHeaders optional
+}
+
+type record of HeaderStruct HeaderStructs;
+
+const StatusLine c_defaultStatusLine := { 
+  version := {1,0},
+  statusCode := 200,
+  reasonPhrase := "OK"
+}
+
+const HeaderStruct c_emptyHeaderStruct := {
+  accept          := omit,
+  acceptEncoding  := omit,
+  acceptLanguage  := omit,
+  allow           := omit,
+  authorization   := omit,
+  bandwidth       := omit,
+  blocksize       := omit,
+  cacheControl    := omit,
+  conference      := omit,
+  connection      := omit,
+  contentBase     := omit,
+  contentEncoding := omit,
+  contentLanguage := omit,
+  contentLength   := omit,
+  contentLocation := omit,
+  contentType     := omit,
+  cSeq            := omit,
+  date            := omit,
+  expires         := omit,
+  fromField       := omit,
+  host            := omit,
+  ifMatch         := omit,
+  ifModifiedSince := omit,
+  lastModified    := omit,
+  location        := omit,
+  proxyAuth       := omit,
+  proxyRequire    := omit,
+  publicField     := omit,
+  range           := omit,
+  rdtFeatureLevel := omit,
+  realChallenge1  := omit,
+  reconnect       := omit,
+  referer         := omit,
+  retryAfter      := omit,
+  require         := omit,
+  rtcpInterval    := omit,
+  rtpInfo         := omit,
+  scale           := omit,
+  speed           := omit,
+  server          := omit,
+  session         := omit,
+  statsMask       := omit,
+  timeStamp       := omit,
+  transport       := omit,
+  unsupported     := omit,
+  userAgent       := omit,
+  vary            := omit,
+  via             := omit,
+  vsrc            := omit,
+  wwwAuth         := omit,
+  xRealUsestrackid:= omit,
+  xVigBno         := omit,
+  xVigMsisdn      := omit,
+  xRetransmit     := omit,
+  xDynamicRate    := omit,
+  xTransportOptions := omit,
+  xPrebuffer      := omit,
+  xAction         := omit,
+  xEncodingFiles  := omit, 
+  xUdpPipe	  := omit, 
+  xMbmsSync	  := omit,  
+  xBandwidth	  := omit,  
+  xContent	  := omit,  
+  xFec		  := omit,   
+  xUserPlaneDest  := omit, 
+  xFluteBitrate   := omit, 
+  xTsi		  := omit,  
+  xContentFdtSendInterval := omit, 
+  xReporting	  := omit,     
+  extensionHeaders := omit
+}
+
+//============ RESPONSE ======================
+//[1] Section 7:
+type record RTSPResponse {
+  StatusLine     statusLine,
+  HeaderStruct   header,
+  octetstring    body
+};
+
+//[1] Section 7.1:
+type record StatusLine {
+  RTSPVersion  version,
+  integer      statusCode,  //three-digit
+  charstring   reasonPhrase //"*<TEXT, excluding CR, LF"
+}
+
+//=== Status Info ===
+
+type record StatusInfo {
+  integer      statusCode,  //three-digit
+  charstring   reasonPhrase //"*<TEXT, excluding CR, LF"
+}
+
+type record of StatusInfo StatusInfoList;
+
+//Not allowed codes are commented out according to ref[1]/7.1.1:
+const StatusInfoList c_statusInfoList := {
+//Ref[2]/10.1 Informational 1xx:
+  {100,"Continue"},
+  //{101,"Switching Protocols"},
+
+//Ref[2]/10.2 Successful 2xx
+  {200,"OK"},
+  {201,"Created"},
+  //{202,"Accepted"},
+  //{203,"Non-Authoritative Information"},
+  //{204,"No Content"},
+  //{205,"Reset Content"},
+  //{206,"Partial Content"},
+  {250,"Low on Storage Place"}, //Ref[1]/11.1.1
+
+//Ref[2]10.3 Redirection 3xx
+  {300, "Multiple Choices"},
+  {301, "Moved Permanently"},
+  {302, "Moved Temporarily"},
+  {303, "See Other"},
+  {304, "Not Modified"},
+  {305, "Use Proxy"},
+
+//Ref[2]/10.4. Client Error 4xxx
+  {400, "Bad Request"},
+  {401, "Unauthorized"},
+  {402, "Payment Required"},
+  {403, "Forbidden"},
+  {404, "Not Found"},
+  {405, "Method Not Allowed"},
+  {406, "Not Acceptable"},
+  {407, "Proxy Authentication Required"},
+  {408, "Request Timeout"},
+  //{409,"Conflict"},
+  {410,"Gone"},
+  {411,"Length Required"},
+  {412,"Precondition Failed"},
+  {413,"Request Entity Too Large"},
+  {414,"Request-URI Too Long"},
+  {415,"Unsuppported Media Type"},
+  {451,"Parameter Not Understood"}, //Ref[1]/11.3.2
+  {452,"Conference Not Found"}, //Ref[1]/11.3.3
+  {453,"Not Enough Bandwidth"}, //Ref[1]/11.3.4
+  {454,"Session Not Found"}, //Ref[1]/11.3.5
+  {455,"Method Not Valid in This State"}, //Ref[1]/11.3.6
+  {456,"HeaderField Not Valid for Resource"}, //Ref[1]/11.3.7
+  {457,"Invalid Range"}, //Ref[1]/11.3.8
+  {458,"Parameter is Read-Only"}, //Ref[1]/11.3.9
+  {459,"Aggregate Operation Not Allowed"}, //Ref[1]/11.3.10
+  {460,"Only Aggregate Operation Allowed"}, //Ref[1]/11.3.11
+  {461,"Unsupported Transport"}, //Ref[1]/11.3.12
+  {462,"Destination Unreachable"}, //Ref[1]/11.3.13
+
+//Ref[2]/10.5 Server Error 5xx
+  {500,"Internal Server Error"},
+  {501,"Not Implemented"},
+  {502,"Bad Gateway"},
+  {503,"Service Unavailable"},
+  {504,"Gateway Timeout"},
+  {505,"RTSP Version Not Supported"},
+  {551,"Option not supported"} //Ref[1]/11.3.14
+}
+
+
+
+//temp, shall be removed!
+type record RTSP_erronous_msg {
+  charstring msg
+}
+
+
+
+
+}
