@@ -13,7 +13,7 @@
 //
 //  File:               RTSP_EncDec.cc
 //  Description:        Encoding decoding functions for RTSP protocol modules
-//  Rev:                R2A
+//  Rev:                R2B
 //  Prodnr:             CNL 113 588
 
 #include "RTSP_Types.hh"

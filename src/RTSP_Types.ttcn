@@ -13,7 +13,7 @@
 //
 //  File:               RTSP_Types.ttcn
 //  Description:        RTSP Message types
-//  Rev:                R2A
+//  Rev:                R2B
 //  Prodnr:             CNL 113 588
 //  References:     [1]  RFC 2326, Real Time Streaming Protocol -- 1.0
 //                  [2]  RFC 2068, Hypertext Transfer Protocol -- HTTP 1.1
