@@ -1,0 +1,390 @@
+---
+Author: Endre Kulcsár
+Version: 155 17-CNL 113 588, Rev. A
+Date: 2012-06-14
+
+---
+= The Real Time Streaming Protocol (RTSP) Protocol Modules for TTCN-3 Toolset with TITAN, Function Specification
+:author: Endre Kulcsár
+:revnumber: 155 17-CNL 113 588, Rev. A
+:revdate: 2012-06-14
+:toc:
+
+== How to Read This Document
+
+This is the Function Specification for the Real Time Streaming Protocol (RTSP) protocol modules. RTSP protocol modules are developed for the TTCN-3 Toolset with TITAN.
+
+== Scope
+
+The purpose of this document is to specify the content of the Real Time Streaming Protocol (RTSP) protocol modules. Basic knowledge of TTCN-3 <<_2, [2]>> and TITAN TTCN-3 Test Executor <<_3, ‎[3]>> is valuable when reading this document.
+
+= General
+
+Protocol modules implement the message structures of the related protocol in a formalized way, using the standard specification language TTCN-3. This allows defining of test data (templates) in the TTCN-3 language <<_2, [2]>> and correctly encoding/decoding messages when executing test suites using the
+TITAN TTCN-3 test environment <<_3, [3]>>.
+
+NOTE: This version of the protocol module is not compatible with TITAN
+releases earlier than R8B.
+
+= Functional Specification
+
+== Protocol Version Implemented
+
+This set of protocol modules implements protocol messages and constants of The Real Time Streaming Protocol (RTSP). The modules are based on RFC 2326 (see ‎[1]) and Interface Description [5].
+
+=== Implemented Messages
+
+According to <<_1, ‎[1]>> both RTSP message types "request" and "response" are implemented. Additionally the message type "erroneous message" is introduced for not decodable messages.
+
+=== Implemented Methods
+
+All methods specified in Chapter 6.1 of <<_1, ‎[1]>> are implemented as follows:
+
+* `"DESCRIBE"`
+
+* `"ANNOUNCE"`
+
+* `"GET_PARAMETER"`
+
+* `"OPTIONS"`
+
+* `"PAUSE"`
+
+* `"PLAY"`
+
+* `"RECORD"`
+
+* `"REDIRECT"`
+
+* `"SETUP"`
+
+* `"SET_PARAMETER"`
+
+* `"TEARDOWN"`
+
+[[supported_header_fields]]
+=== Supported Header Fields
+
+All header field specified in Chapter 12 of ‎<<_1, [1]>> is supported as listed below. The fields in parentheses are not listed in Chapter 12 of ‎<<_1, [1]>> but listed in subchapters of chapter 12 of <<_1, ‎[1]>>.
+
+* *_Accept_*
+
+* *_Accept-Encoding_*
+
+* *_Accept-Language_*
+
+* *_Allow_*
+
+* *_Authorization_*
+
+* *_Bandwidth_*
+
+* *_Blocksize_*
+
+* *_Cache-Control_*
+
+* *_Conference_*
+
+* *_Connection_*
+
+* *_Content-Base_*
+
+* *_Content-Encoding_*
+
+* *_Content-Language_*
+
+* *_Content-Length_*
+
+* *_Content-Location_*
+
+* *_Content-Type_*
+
+* *_Content-Type_*
+
+* *_CSeq_*
+
+* *_Date_*
+
+* *_Expires_*
+
+* *_From_*
+
+* *_(Host)_*
+
+* *_(If-Match)_*
+
+* *_If-Modified-Since_*
+
+* *_Last-Modified_*
+
+* *_Proxy-Authenticate_*
+
+* *_Proxy-Require_*
+
+* *_Public_*
+
+* *_Range_*
+
+* *_Referer_*
+
+* *_Require_*
+
+* *_Retry-After_*
+
+* *_RTP-Info_*
+
+* *_Scale_*
+
+* *_Session_*
+
+* *_Server_*
+
+* *_Speed_*
+
+* *_(Time-Stamp)_*
+
+* *_Transport_*
+
+* *_Unsupported_*
+
+* *_User-Agent_*
+
+* *_(Vary)_*
+
+* *_Via_*
+
+* *_WWW-Authenticate_*
+
+[[implemented_but_not_specified_header_fields]]
+=== Implemented But Not Specified Header Fields
+
+The list of implemented header fields which are not specified in <<_1, ‎[1]>> is as follows. They are used in Ericsson proprietary solutions.
+
+* *_RDTFeatureLevel_*
+
+* *_RealChallenge1_*
+
+* *_Reconnect_*
+
+* *_Rtcp-Interval_*
+
+* *_StatsMask_*
+
+* *_Vsrc_*
+
+* *_x-Real-usestrackid_*
+
+* *_x-Vig-Bno_*
+
+* *_x-Vig-MSISDN_*
+
+* *_x-retransmit_*
+
+* *_x-dynamic-rate_*
+
+* *_x-transport-options_*
+
+* *_x-prebuffer_*
+
+In addition the following headers specified in [5] are also implemented:
+
+*_X-ActionX-EncodingFilesX-UdpPipe_*
+
+*_X-MbmsSync_*
+
+*_X-Bandwidth_*
+
+*_X-Content_*
+
+*_X-Fec_*
+
+*_X-UserPlaneDest_*
+
+*_X-FluteBitrate_*
+
+*_X-TsiX-ContentFdtSendIntervalX-Reporting_*
+
+
+[[header_field_extensibility]]
+=== Header Field Extensibility
+
+Each header field listed in <<supported_header_fields, Supported Header Fields>> and <<implemented_but_not_specified_header_fields, Implemented But Not Specified Header Fields>> are available as optional fields having value of characterstring. To provide the extensibility for future development, extension header list is implemented. It is a list of name-value pairs where both names and values are arbitrary charstrings (see ‎<<header_implementation, Header Implementation>>).
+
+[[header_implementation]]
+=== Header Implementation
+
+According to <<supported_header_fields, Supported Header Fields>>, ‎<<implemented_but_not_specified_header_fields, Implemented But Not Specified Header Fields>> and ‎<<header_field_extensibility, Header Field Extensibility>>, common header implemented for RTSP request and response to support positive and negative test as follows:
+
+
+[source]
+----
+type set HeaderStruct {
+  charstring    accept          optional, //12.1
+  charstring    acceptEncoding  optional, //12.2
+  charstring    acceptLanguage  optional, //12.3
+  charstring    allow           optional, //12.4
+  charstring    authorization   optional, //12.5
+  charstring    bandwidth       optional, //12.6
+  charstring    blocksize       optional, //12.7
+  charstring    cacheControl    optional, //12.8
+  charstring    conference      optional, //12.9
+  charstring    connection      optional, //12.10
+  charstring    contentBase     optional, //12.11
+  charstring    contentEncoding optional, //12.12
+  charstring    contentLanguage optional, //12.13
+  charstring    contentLength   optional, //12.14
+  charstring    contentLocation optional, //12.15
+  charstring    contentType     optional, //12.16
+  charstring    cSeq            optional, //12.17
+  charstring    date            optional, //12.18
+  charstring    expires         optional, //12.19
+  charstring    fromField       optional, //12.20
+  charstring    host            optional, //12.21
+  charstring    ifMatch         optional, //12.22
+  charstring    ifModifiedSince optional, //12.23
+  charstring    lastModified    optional, //12.24
+  charstring    location        optional, //12.25
+  charstring    proxyAuth       optional, //12.26
+  charstring    proxyRequire    optional, //12/27
+  charstring    publicField     optional, //12.28
+  charstring    range           optional, //12.29
+  charstring    rdtFeatureLevel optional, //additional
+  charstring    realChallenge1  optional, //additional
+  charstring    reconnect       optional, //additional
+  charstring    referer         optional, //12.30
+  charstring    retryAfter      optional, //12.31
+  charstring    require         optional, //12.32
+  charstring    rtcpInterval    optional, //additional
+  charstring    rtpInfo         optional, //12.33
+  charstring    scale           optional, //12.34
+  charstring    speed           optional, //12.35
+  charstring    server          optional, //12.36
+  charstring    session         optional, //12.37
+  charstring    statsMask       optional, //additional
+  charstring    timeStamp       optional, //12.38
+  charstring    transport       optional, //12.39
+  charstring    unsupported     optional, //12.40
+  charstring    userAgent       optional, //12.41
+  charstring    vary            optional, //12.42
+  charstring    via             optional, //12.43
+  charstring    vsrc            optional, //additional
+  charstring    wwwAuth         optional, //12.44
+  charstring    xRealUsestrackid optional,//additional
+  charstring    xVigBno         optional, //additional
+  charstring    xVigMsisdn      optional, //additional
+  charstring    xRetransmit     optional, //additional
+  charstring    xDynamicRate    optional, //additional
+  charstring    xTransportOptions optional, //additional
+  charstring    xPrebuffer      optional, //additional
+  charstring    xAction         optional, // RTSPx
+  charstring    xEncodingFiles  optional, // RTSPx
+  charstring    xUdpPipe        optional, // RTSPx
+  charstring    xMbmsSync       optional, // RTSPx
+  charstring    xBandwidth      optional, // RTSPx
+  charstring    xContent        optional, // RTSPx
+  charstring    xFec            optional, // RTSPx
+  charstring    xUserPlaneDest  optional, // RTSPx
+  charstring    xFluteBitrate   optional, // RTSPx
+  charstring    xTsi            optional, // RTSPx
+  charstring    xContentFdtSendInterval optional,//RTSPx
+  charstring    xReporting      optional, // RTSPx
+
+//extensionHeaders:
+  HeaderLines extensionHeaders optional
+}
+Where
+
+type record HeaderLine {
+  charstring header_name,
+  charstring header_value
+};
+----
+
+[[protocol-modifications-deviations]]
+== Protocol Modifications/Deviations
+
+=== Relaxed Conditions
+
+There is no constraint between received and sent messages. The constraints should be implemented in the user’s test program.
+
+URI in the request line is a simple charstring. Its correctness is not checked.
+
+Reason Code can be any integer in the Status Line
+
+Reason Phrase can be any charstring. There is no constraint between them for test purposes.
+
+=== Restrictions
+
+Octetestrings supported only.
+
+Utf8text not supported.
+
+The encoded message is octetstring. Within it the request line, the status line and the header shall be convertible for charstring, the body can be any octetstring.
+
+[[encoding-decoding-and-other-related-functions]]
+== Encoding/Decoding and Other Related Functions
+
+This product also contains encoding/decoding functions that assure correct encoding of messages when sent from TITAN and correct decoding of messages when received by TITAN. Implemented encoding/decoding functions and the extra length calculator function are:
+
+[width="100%",cols="25%,25%,25%,25%",options="header",]
+|=======================================================================================================================================================================================
+|Name  |Type of formal parameters |Type of return value |Description
+|`enc_PDU_RTSP` |in `PDU_RTSP` msg,
+in Boolean automaticContentLengthCalc:=true |Octetstring |Encodes the RTSP PDU into octetestring
+|`dec_PDU_RTSP` |in octetstring stream,
+inout `PDU_RTSP` msg, in boolean debugging := `tsp_RTSP_debugging` |integer |Decodes the message in octestring into `PDU_RTSP`
+|`f_RTSP_getMsgLen` |In octetstring stream |integer |Calculates the length of the message stream from the beginning of the message (especially from the field Content-Length).
+|=======================================================================================================================================================================================
+
+[[encoding-decoding-logic]]
+== Encoding/Decoding Logic
+
+According to https://www.ietf.org/rfc/rfc2326.txt[RFC2326], the following rules are followed in the decoding and encoding processes:
+
+* The lines are finished by "\r\n". Message lines finished only by "\n" can be tolerated. The degree of tolerance is `ERROR`, `WARNING`, `WARNING_ONCE` or `ACCEPT`.
+* If the message begins with "RTSP/" it is an RTSP response, otherwise it is an RTSP request.
+
+* The RTSP message consists of *three* parts:
+
+1. The *first line* of the message *is the first part* of the message. It is the Status Line for message type of request otherwise the first line is the Request Line. They are split up according to https://www.ietf.org/rfc/rfc2326.txt[RFC 2326].
+
+2.  The *second part* of the message is *the header*. It consists of header fields. Details can be found in ‎<<supported_header_fields, Supported Header Fields>> - ‎‎<<header_implementation, Header Implementation>>.
++
+The header finished by an additional "\r\n" (i.e a sequence "r" is the end of the header).
+
+3.  The *third field* of the message is *the body*. It can be any octetstring.
+
+* The header field *_Content-Length_* is present (with correct value) in the encoded message if and only if the body length is greater than `_"zero"_` and the `automaticContentLengthCalc` parameter of the encoding function is `_true_`. If this parameter is set `_false_` then the *_Content-Length_* header field is encoded as it is in the `HeaderStruct` and its value does not depend on the length of the body so it’s suitable for making negative tests.
+
+= Terminology
+
+TITAN TTCN-3 Test Executor (see <<_3, ‎[3]>>).
+
+= Abbreviations
+
+ETSI:: European Telecommunications Standards Institute
+
+IETF:: Internet Engineering Task Force
+
+RFC:: Request for Comments
+
+RTSP:: Real Time Streaming Protocol
+
+TTCN-3:: Testing and Test Control Notation version 3
+
+= References
+
+[[_1]]
+[1] IETF https://www.ietf.org/rfc/rfc2326.txt[RFC 2326] +
+Real Time Streaming Protocol (RTSP)
+
+[[_2]]
+[2] ETSI ES 201 873-1 v.3.2.1 (02/2007) +
+The Testing and Test Control Notation version 3. Part 1: Core Language
+
+[[_3]]
+[3] Programmer’s Technical Reference for the TITAN TTCN-3 Test Executor
+
+[[_4]]
+[4] CBC/XL-12:0167 Uen +
+Interface Description, RTSPx
